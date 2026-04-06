@@ -50,13 +50,32 @@ def resolve_output_path(output_path: str, output_format: str) -> Path:
     default="pdf",
     show_default=True,
     type=click.Choice(SUPPORTED_OUTPUT_FORMATS, case_sensitive=False),
-    help="Output format when --output has no extension.",
+    help="Output format when --output has no suffix.",
 )
-def cli(input_path: str, output_path: str, output_format: str) -> None:
+@click.option(
+    "--dpi",
+    "png_dpi",
+    default=600,
+    show_default=True,
+    type=int,
+    help="PNG DPI (must be >=300 for PNG). Ignored for PDF/SVG.",
+)
+def cli(input_path: str, output_path: str, output_format: str, png_dpi: int) -> None:
     """Generate an A4 portrait Gantt chart from CSV/Markdown data."""
+    if png_dpi <= 0:
+        raise click.ClickException("--dpi must be a positive integer.")
+
+    fmt = output_format.lower().strip()
+    if fmt == "png" and png_dpi < 300:
+        raise click.ClickException("PNG output requires --dpi >= 300.")
+
     dataset = load_timeline_data(input_path)
-    final_output_path = resolve_output_path(output_path, output_format)
-    output_file = plot_gantt(data=dataset, output_path=str(final_output_path))
+    final_output_path = resolve_output_path(output_path, fmt)
+    output_file = plot_gantt(
+        data=dataset,
+        output_path=str(final_output_path),
+        png_dpi=png_dpi,
+    )
 
     click.echo(f"Chart generated: {output_file.resolve()}")
     click.echo(f"Rows parsed: {len(dataset)}")

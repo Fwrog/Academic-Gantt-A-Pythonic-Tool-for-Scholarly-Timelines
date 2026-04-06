@@ -15,16 +15,27 @@ from src.styles import apply_plot_style
 A4_PORTRAIT_SIZE_INCH = (8.27, 11.69)
 
 
-def plot_gantt(data: pd.DataFrame, output_path: str, row_height: float = 0.34) -> Path:
+def _contains_cjk(text: str) -> bool:
+    return any("\u4e00" <= ch <= "\u9fff" for ch in text)
+
+
+def plot_gantt(
+    data: pd.DataFrame,
+    output_path: str,
+    png_dpi: int = 600,
+    row_height: float = 0.28,
+) -> Path:
     """Draw an A4-portrait Gantt chart with compact spacing."""
     style_cfg = apply_plot_style()
 
     rows = len(data)
     fig = plt.figure(figsize=A4_PORTRAIT_SIZE_INCH)
-    ax = fig.add_axes([0.24, 0.33, 0.70, 0.43])
+    # Keep A4 portrait page size while making the chart region visually compact.
+    ax = fig.add_axes([0.20, 0.42, 0.74, 0.30])
 
-    y_step = 0.72
+    y_step = 0.4
     y_positions = [(rows - 1 - i) * y_step for i in range(rows)]
+    task_labels = data["Task"].tolist()
 
     for row_idx, (_, row) in enumerate(data.iterrows()):
         y = y_positions[row_idx]
@@ -46,7 +57,7 @@ def plot_gantt(data: pd.DataFrame, output_path: str, row_height: float = 0.34) -
                 start_num,
                 y,
                 marker="D",
-                s=32,
+                s=30,
                 color=style_cfg["milestone_color"],
                 edgecolors=style_cfg["axes_facecolor"],
                 linewidth=0.7,
@@ -54,20 +65,28 @@ def plot_gantt(data: pd.DataFrame, output_path: str, row_height: float = 0.34) -
             )
 
     ax.set_yticks(y_positions)
-    ax.set_yticklabels(data["Task"].tolist(), fontweight="semibold")
+    ax.set_yticklabels(task_labels, fontweight="semibold")
+
+    for tick_obj, label_text in zip(ax.get_yticklabels(), task_labels):
+        if _contains_cjk(label_text):
+            tick_obj.set_fontname(style_cfg["chinese_font"])
+            tick_obj.set_fontsize(8.8)
+        else:
+            tick_obj.set_fontname(style_cfg["english_font"])
+            tick_obj.set_fontsize(8)
 
     all_starts = mdates.date2num(data["Start"])
     all_ends = mdates.date2num(data["End"])
-    margin_days = 35
+    margin_days = 30
     x_min = all_starts.min() - margin_days
     x_max = all_ends.max() + margin_days
     ax.set_xlim(x_min, x_max)
 
     top_y = y_positions[0] if y_positions else 0
-    ax.set_ylim(-0.35, top_y + 0.95)
+    ax.set_ylim(-0.24, top_y + 0.78)
 
-    band_bottom = top_y + 0.53
-    band_top = top_y + 0.83
+    band_bottom = top_y + 0.43
+    band_top = top_y + 0.66
     ax.axhspan(band_bottom, band_top, color=style_cfg["year_band_color"], zorder=2)
 
     first_year = int(data["Start"].min().year)
@@ -99,20 +118,21 @@ def plot_gantt(data: pd.DataFrame, output_path: str, row_height: float = 0.34) -
             fontsize=8,
             fontweight="bold",
             color="#FFFFFF",
+            fontname=style_cfg["english_font"],
             zorder=4,
             clip_on=False,
         )
 
     ax.set_xlabel("")
     ax.set_xticks([])
-    ax.tick_params(axis="y", length=0, pad=4)
+    ax.tick_params(axis="y", length=0, pad=3)
 
     for spine in ["top", "right", "left", "bottom"]:
         ax.spines[spine].set_visible(False)
 
     output = Path(output_path)
     output.parent.mkdir(parents=True, exist_ok=True)
-    save_kwargs = {"dpi": 320} if output.suffix.lower() == ".png" else {}
+    save_kwargs = {"dpi": png_dpi} if output.suffix.lower() == ".png" else {}
 
     fig.savefig(output, **save_kwargs)
     plt.close(fig)
