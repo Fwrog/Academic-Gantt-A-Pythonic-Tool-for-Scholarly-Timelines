@@ -10,8 +10,8 @@ THEME = {
     "milestone_color": "#1F4F84",
     "year_band_color": "#244F82",
     "year_divider_color": "#5C7CA3",
-    "figure_facecolor": "#E6E6E6",
-    "axes_facecolor": "#E6E6E6",
+    "figure_facecolor": "#FFFFFF",
+    "axes_facecolor": "#FFFFFF",
     "font_color": "#111111",
 }
 
@@ -67,3 +67,4 @@ def apply_plot_style() -> dict:
         }
     )
     return {**THEME, "english_font": en_font, "chinese_font": zh_font}
+
