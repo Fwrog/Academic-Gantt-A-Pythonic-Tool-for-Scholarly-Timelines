@@ -5,14 +5,15 @@ from pathlib import Path
 
 import pandas as pd
 
-REQUIRED_COLUMNS = ["Task", "Start", "End", "Resource", "Type"]
+REQUIRED_COLUMNS = ["Task", "Start", "End", "Type"]
 
 COLUMN_ALIASES = {
     "Task": {"task", "任务", "任务名称", "项目", "阶段"},
     "Start": {"start", "开始", "开始日期"},
     "End": {"end", "结束", "结束日期"},
-    "Resource": {"resource", "资源", "类别", "任务类别", "分组"},
     "Type": {"type", "类型", "节点类型"},
+    # Optional legacy column: keep compatibility if provided.
+    "Resource": {"resource", "资源", "类别", "任务类别", "分组"},
 }
 
 TYPE_ALIASES = {
@@ -83,8 +84,7 @@ def _canonicalize_columns(df: pd.DataFrame) -> pd.DataFrame:
         else:
             rename_map[col] = str(col).replace("\ufeff", "").strip()
 
-    renamed = df.rename(columns=rename_map).copy()
-    return renamed
+    return df.rename(columns=rename_map).copy()
 
 
 def _normalize_type_value(raw_type: str) -> str:
@@ -103,12 +103,10 @@ def _validate_dataframe(df: pd.DataFrame) -> pd.DataFrame:
         raise ValueError(
             "Missing required columns: "
             + ", ".join(missing)
-            + ". Required/Supported headers: Task(任务), Start(开始), End(结束), "
-            + "Resource(资源), Type(类型)."
+            + ". Required/Supported headers: Task(任务), Start(开始), End(结束), Type(类型)."
         )
 
     clean_df["Task"] = clean_df["Task"].astype(str).str.strip()
-    clean_df["Resource"] = clean_df["Resource"].astype(str).str.strip()
     clean_df["Type"] = clean_df["Type"].astype(str).map(_normalize_type_value)
 
     clean_df["Start"] = pd.to_datetime(clean_df["Start"], format="%Y-%m-%d", errors="coerce")
@@ -116,8 +114,6 @@ def _validate_dataframe(df: pd.DataFrame) -> pd.DataFrame:
 
     if clean_df["Task"].eq("").any():
         raise ValueError("Column 'Task/任务' contains empty values.")
-    if clean_df["Resource"].eq("").any():
-        raise ValueError("Column 'Resource/资源' contains empty values.")
     if clean_df["Start"].isna().any():
         raise ValueError("Column 'Start/开始' contains invalid dates. Use YYYY-MM-DD.")
     if clean_df["End"].isna().any():

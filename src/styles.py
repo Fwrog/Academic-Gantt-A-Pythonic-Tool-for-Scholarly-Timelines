@@ -3,13 +3,15 @@
 import matplotlib as mpl
 from matplotlib import font_manager
 
+# Palette extracted from reference slides:
+# background gray + navy year band + cyan task bars.
 THEME = {
-    "task_color": "#27B3BB",
-    "milestone_color": "#1E4E82",
+    "task_color": "#19B7BE",
+    "milestone_color": "#1F4F84",
     "year_band_color": "#244F82",
-    "year_divider_color": "#5F7FA7",
-    "figure_facecolor": "#E7E7E7",
-    "axes_facecolor": "#E7E7E7",
+    "year_divider_color": "#5C7CA3",
+    "figure_facecolor": "#E6E6E6",
+    "axes_facecolor": "#E6E6E6",
     "font_color": "#111111",
 }
 
@@ -46,13 +48,13 @@ def apply_plot_style() -> dict:
     en_font, zh_font = resolve_language_fonts()
     mpl.rcParams.update(
         {
-            "font.size": 8,
-            "axes.titlesize": 8,
-            "axes.labelsize": 8,
+            "font.size": 10,
+            "axes.titlesize": 10,
+            "axes.labelsize": 10,
             "axes.edgecolor": THEME["axes_facecolor"],
             "axes.linewidth": 0.8,
-            "xtick.labelsize": 8,
-            "ytick.labelsize": 8,
+            "xtick.labelsize": 9,
+            "ytick.labelsize": 10,
             "font.family": "sans-serif",
             "font.sans-serif": [en_font, zh_font, "DejaVu Sans"],
             "axes.unicode_minus": False,

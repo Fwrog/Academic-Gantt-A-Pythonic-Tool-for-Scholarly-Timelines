@@ -1,7 +1,7 @@
-﻿Task,Start,End,Resource,Type
-Literature Review,2024-01-01,2024-06-30,Research,Task
-Data Collection,2024-04-01,2024-12-31,Fieldwork,Task
-Interim Report,2024-12-31,2024-12-31,Admin,Milestone
-Algorithm Design,2025-01-01,2025-06-30,Development,Task
-Prototype Testing,2025-07-01,2025-12-31,Development,Task
-Final Thesis Submission,2026-06-01,2026-06-01,Admin,Milestone
+﻿Task,Start,End,Type
+Literature Review,2026-03-01,2026-04-30,Task
+Data Collection,2026-04-01,2026-05-31,Task
+Algorithm Design,2026-05-01,2026-07-31,Task
+Code Implementation & Execution,2026-06-15,2026-08-31,Task
+Data Analysis & Visualization,2026-08-01,2026-10-15,Task
+Manuscript Preparation,2026-09-15,2026-11-30,Task
